@@ -26,6 +26,7 @@ GROUND_LEVEL = 450
 
 # Physics constants
 GRAVITY = 0.8
+GRAVITY_BOOST = 0.5  # Additional gravity when down key is pressed
 JUMP_STRENGTH = 15
 PLAYER_SIZE = 40
 PLAYER_DUCK_SIZE = 25
@@ -47,6 +48,7 @@ class Player:
 		self.velocity_y = 0
 		self.is_jumping = False
 		self.is_ducking = False
+		self.is_down_pressed = False  # Track if down key is held
 		self.ground_bottom = y + PLAYER_SIZE  # Bottom position where feet touch ground
 		
 	def jump(self):
@@ -56,15 +58,20 @@ class Player:
 	
 	def start_duck(self):
 		self.is_ducking = True
+		self.is_down_pressed = True
 		self.height = PLAYER_DUCK_SIZE
 	
 	def stop_duck(self):
 		self.is_ducking = False
+		self.is_down_pressed = False
 		self.height = PLAYER_SIZE
 	
 	def update(self):
 		# Apply gravity
-		self.velocity_y += GRAVITY
+		gravity = GRAVITY
+		if self.is_down_pressed:
+			gravity += GRAVITY_BOOST
+		self.velocity_y += gravity
 		self.y += self.velocity_y
 		
 		# Check if landed on ground (bottom of player hits ground)
