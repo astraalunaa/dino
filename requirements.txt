@@ -1,1 +1,6 @@
 pygame
+numpy
+scipy
+scikit-fuzzy
+packaging
+networkx

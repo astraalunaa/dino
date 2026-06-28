@@ -2,6 +2,7 @@ import random
 
 import pygame
 
+from Classes import AI
 from Constants.Colors import Colors as col
 from Constants.Keybinds import Keybinds as keyb
 from Entities.Enemy import Enemy
@@ -64,17 +65,35 @@ class Game:
         self.score = 0
         self.current_speed = 5  # Reset speed on restart
 
-    def update(self):
+    def update(self, dt):
         if self.game_over:
             return
 
-        # --- DIFFICULTY SCALING (Speed Increase) ---
+        # --- DIFFICULTY SCALING (Speed Increase) --- # Claude aah scripting lol
         # Gradually increase the speed based on elapsed time/score
         # Speed increases by 0.01 every second of gameplay
         speed_increase = self.score / 5000.0  # Slow, continuous increase
         self.current_speed = min(20, self.current_speed + speed_increase)
 
-        self.player.update()
+        # AI gameplay -- astraalunaa
+        if self.enemies:
+            closest_enemy = self.enemies[0]
+            # Find closest enemy from a distance
+            if closest_enemy.x < self.player.x:
+                for enemy in self.enemies:
+                    if enemy.x > self.player.x + self.player.width:
+                        closest_enemy = enemy
+
+            strength, duck = AI.process(
+                self.player.x, closest_enemy, self.current_speed
+            )
+
+            print(closest_enemy.x - self.player.x, strength, duck)
+
+            if strength > 0.1:
+                self.player.jump(strength)
+
+        self.player.update(dt)
 
         # Spawn enemies with a minimum interval and spacing so the game remains fair.
         self.spawn_timer -= 1
@@ -108,7 +127,7 @@ class Game:
         if enemy_type == "ptero" and self.current_speed >= 8:
             width = 35
             height = 30
-            y = GROUND_LEVEL + PLAYER_SIZE - height - random.choice([80, 110])
+            y = GROUND_LEVEL + PLAYER_SIZE - height - random.choice([30, 60, 120])
             color = col.GRAY
         else:
             width = ENEMY_WIDTH + random.randint(-5, 10)
@@ -191,10 +210,11 @@ class Game:
         pygame.display.flip()
 
     def run(self):
+        dt = 0.001 / FPS
         while self.running:
             self.handle_events()
-            self.update()
+            self.update(dt)
             self.draw()
-            self.clock.tick(FPS)
+            dt = self.clock.tick(FPS) / 1000
 
         pygame.quit()

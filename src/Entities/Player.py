@@ -19,13 +19,21 @@ class Player:
         self.velocity_y = 0
         self.is_jumping = False
         self.is_ducking = False
+        self.is_up_pressed = False
         self.is_down_pressed = False  # Track if down key is held
+        self.duck_timer = 0
         self.ground_bottom = y + PLAYER_SIZE  # Bottom position where feet touch ground
 
-    def jump(self):
+    def jump(self, strength=1.0):
         if not self.is_jumping:
-            self.velocity_y = -JUMP_STRENGTH
+            self.velocity_y = -JUMP_STRENGTH * strength
             self.is_jumping = True
+
+    def ai_duck(self):
+        if self.duck_timer == 0:
+            self.is_ducking = True
+            self.is_down_pressed = True
+            self.height = PLAYER_DUCK_SIZE
 
     def start_duck(self):
         self.is_ducking = True
@@ -37,13 +45,17 @@ class Player:
         self.is_down_pressed = False
         self.height = PLAYER_SIZE
 
-    def update(self):
+    def update(self, dt):
         # Apply gravity
         gravity = GRAVITY
         if self.is_down_pressed:
             gravity += GRAVITY_BOOST
         self.velocity_y += gravity
         self.y += self.velocity_y
+
+        # Update AI duck timer
+        if self.duck_timer > 0:
+            pass
 
         # Check if landed on ground (bottom of player hits ground)
         if self.y + self.height >= self.ground_bottom:

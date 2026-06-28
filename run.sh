@@ -9,6 +9,10 @@ if [ ! -d "$VENV_DIR" ]; then
     "$PYTHON_BIN" -m pip install -r requirements.txt
 else
     source "$VENV_DIR/bin/activate"
+
+    # Check and install missing dependencies
+    "$PYTHON_BIN" -m pip install --upgrade pip
+    "$PYTHON_BIN" -m pip install -r requirements.txt
 fi
 
 cd src
